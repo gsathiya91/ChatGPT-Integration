@@ -43,7 +43,7 @@ composer install
    ```bash
    cp .env.example .env
    ```
-2.Open the .env file and update the following settings:
+2. Open the .env file and update the following settings:
 
   OpenAI API Key: Add your OpenAI API key for accessing ChatGPT services.
   Database Credentials: Configure your database connection details.
@@ -67,4 +67,18 @@ composer install
     php artisan migrate
     ```
 4. Generate Application Key
+    ```bash
+    php artisan key:generate
+    ```
+5. Start the Application
+   ```bash
+    php artisan serve
+   ```
+
+### Usage
+
+## Chat Interface
+Navigate to http://127.0.0.1:8000/chat.
+Enter a message in the input box and click "Send" to interact with ChatGPT.
+    
    
