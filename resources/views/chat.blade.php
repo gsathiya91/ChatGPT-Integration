@@ -101,131 +101,415 @@
 
     <script src="https://cdn.jsdelivr.net/npm/showdown/dist/showdown.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            const chatBox = document.getElementById('chat-box');
-            const sendMessageButton = document.getElementById('send-message');
-            const userMessageInput = document.getElementById('user-message');
+        // document.addEventListener('DOMContentLoaded', async () => {
+        //     const chatBox = document.getElementById('chat-box');
+        //     const sendMessageButton = document.getElementById('send-message');
+        //     const userMessageInput = document.getElementById('user-message');
 
-            const converter = new showdown.Converter();
+        //     const converter = new showdown.Converter();
 
-            const getTimestamp = () => {
-                const now = new Date();
-                const date = now.toLocaleDateString([], {
-                    year: 'numeric',
-                    month: 'short',
-                    day: '2-digit'
-                });
-                const time = now.toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                });
-                return `${date} ${time}`;
-            };
-            const appendMessage = (message, type, timestamp) => {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = type === 'user' ? 'user-message' : 'chatgpt-message';
+        //     const getTimestamp = () => {
+        //         const now = new Date();
+        //         const date = now.toLocaleDateString([], {
+        //             year: 'numeric',
+        //             month: 'short',
+        //             day: '2-digit'
+        //         });
+        //         const time = now.toLocaleTimeString([], {
+        //             hour: '2-digit',
+        //             minute: '2-digit',
+        //             hour12: true
+        //         });
+        //         return `${date} ${time}`;
+        //     };
+        //     const appendMessage = (message, type, timestamp) => {
+        //         const messageDiv = document.createElement('div');
+        //         messageDiv.className = type === 'user' ? 'user-message' : 'chatgpt-message';
 
-                const formattedMessage =
-                    type === 'chatgpt' ? converter.makeHtml(message) : message.replace(/\n/g, '<br>');
+        //         const formattedMessage =
+        //             type === 'chatgpt' ? converter.makeHtml(message) : message.replace(/\n/g, '<br>');
 
-                messageDiv.innerHTML = `
-                <span style="font-size: 0.8em; color: gray;">[${timestamp}]</span>
-                <br>
-                ${formattedMessage}
-            `;
+        //         messageDiv.innerHTML = `
+    //         <span style="font-size: 0.8em; color: gray;">[${timestamp}]</span>
+    //         <br>
+    //         ${formattedMessage}
+    //     `;
 
-                chatBox.appendChild(messageDiv);
-                chatBox.scrollTop = chatBox.scrollHeight;
-            };
+        //         chatBox.appendChild(messageDiv);
+        //         chatBox.scrollTop = chatBox.scrollHeight;
+        //     };
 
-            try {
-                const response = await fetch('/api/get-conversations', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
+        //     try {
+        //         const response = await fetch('/api/get-conversations', {
+        //             method: 'GET',
+        //             headers: {
+        //                 'Content-Type': 'application/json',
+        //             },
+        //         });
+        // 		console.log({response})
+        //         if (!response.ok) {
+        //             throw new Error('Failed to fetch previous conversations.');
+        //         }
 
-                if (!response.ok) {
-                    throw new Error('Failed to fetch previous conversations.');
-                }
+        //         const data = await response.json();
+        //         if (data.status === 'success') {
+        //             const conversations = data.data;
 
-                const data = await response.json();
-                if (data.status === 'success') {
-                    const conversations = data.data;
+        //             conversations.forEach(conversation => {
+        //                 const timestamp = new Date(conversation.created_at).toLocaleString([], {
+        //                     year: 'numeric',
+        //                     month: 'short',
+        //                     day: '2-digit',
+        //                     hour: '2-digit',
+        //                     minute: '2-digit',
+        //                     hour12: true,
+        //                 });
+        //                 appendMessage(`User: ${conversation.user_message}`, 'user', timestamp);
+        //                 appendMessage(`ChatGPT Response: ${conversation.chatgpt_response}`, 'chatgpt',
+        //                     timestamp);
+        //             });
+        //         } else {
+        //             console.error('Error fetching conversations:', data.message);
+        //         }
+        //     } catch (error) {
+        //         console.error('Error fetching conversations:', error.message);
+        //         appendMessage('Error: Could not load previous conversations.', 'chatgpt', getTimestamp());
+        //     }
 
-                    conversations.forEach(conversation => {
-                        const timestamp = new Date(conversation.created_at).toLocaleString([], {
-                            year: 'numeric',
-                            month: 'short',
-                            day: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: true,
-                        });
-                        appendMessage(`User: ${conversation.user_message}`, 'user', timestamp);
-                        appendMessage(`ChatGPT Response: ${conversation.chatgpt_response}`, 'chatgpt',
-                            timestamp);
-                    });
-                } else {
-                    console.error('Error fetching conversations:', data.message);
-                }
-            } catch (error) {
-                console.error('Error fetching conversations:', error.message);
-                appendMessage('Error: Could not load previous conversations.', 'chatgpt', getTimestamp());
-            }
+        //     sendMessageButton.addEventListener('click', async () => {
+        //         const userMessage = userMessageInput.value.trim();
 
-            sendMessageButton.addEventListener('click', async () => {
-                const userMessage = userMessageInput.value.trim();
+        //         if (!userMessage) {
+        //             alert("Please type a message!");
+        //             return;
+        //         }
 
-                if (!userMessage) {
-                    alert("Please type a message!");
-                    return;
-                }
+        //         appendMessage(`User: ${userMessage}`, 'user', getTimestamp());
+        //         sendMessageButton.disabled = true;
 
-                appendMessage(`User: ${userMessage}`, 'user', getTimestamp());
-                sendMessageButton.disabled = true;
+        //         try {
+        //             const csrfToken = document.querySelector('meta[name="csrf-token"]')
+        //                 .getAttribute('content');
+        //             const response = await fetch('/api/send-message', {
+        //                 method: 'POST',
+        //                 headers: {
+        //                     'Content-Type': 'application/json',
+        //                     'X-CSRF-TOKEN': csrfToken,
+        //                 },
+        //                 body: JSON.stringify({
+        //                     message: userMessage
+        //                 }),
+        //             });
 
-                try {
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]')
-                        .getAttribute('content');
-                    const response = await fetch('/api/send-message', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken,
-                        },
-                        body: JSON.stringify({
-                            message: userMessage
-                        }),
-                    });
+        //             if (!response.ok) {
+        //                 throw new Error('Failed to get a response from ChatGPT.');
+        //             }
 
-                    if (!response.ok) {
-                        throw new Error('Failed to get a response from ChatGPT.');
-                    }
+        //             const data = await response.json();
 
-                    const data = await response.json();
+        //             if (data.chatgpt_response) {
+        //                 appendMessage(data.chatgpt_response, 'chatgpt', getTimestamp());
+        //             } else {
+        //                 console.error("Unexpected response format:", data);
+        //                 appendMessage('ChatGPT: Error in generating response.', 'chatgpt',
+        //                     getTimestamp());
+        //             }
+        //         } catch (error) {
+        //             console.error('Error:', error);
+        //             appendMessage('ChatGPT: Failed to communicate with the server.', 'chatgpt',
+        //                 getTimestamp());
+        //             appendMessage(`Error: ${error.message}`, 'chatgpt', getTimestamp());
+        //         } finally {
+        //             sendMessageButton.disabled = false;
+        //             userMessageInput.value = '';
+        //         }
+        //     });
 
-                    if (data.chatgpt_response) {
-                        appendMessage(data.chatgpt_response, 'chatgpt', getTimestamp());
-                    } else {
-                        console.error("Unexpected response format:", data);
-                        appendMessage('ChatGPT: Error in generating response.', 'chatgpt',
-                            getTimestamp());
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    appendMessage('ChatGPT: Failed to communicate with the server.', 'chatgpt',
-                        getTimestamp());
-                    appendMessage(`Error: ${error.message}`, 'chatgpt', getTimestamp());
-                } finally {
-                    sendMessageButton.disabled = false;
-                    userMessageInput.value = '';
-                }
+        // });
+        
+        // document.addEventListener('DOMContentLoaded', () => {
+        //     const chatBox = document.getElementById('chat-box');
+        //     const sendMessageButton = document.getElementById('send-message');
+        //     const userMessageInput = document.getElementById('user-message');
+
+        //     const getTimestamp = () => {
+        //         const now = new Date();
+        //         return now.toLocaleString([], {
+        //             year: 'numeric',
+        //             month: 'short',
+        //             day: '2-digit',
+        //             hour: '2-digit',
+        //             minute: '2-digit',
+        //             hour12: true,
+        //         });
+        //     };
+
+        //     const appendMessage = (message, type, timestamp) => {
+        //         const messageDiv = document.createElement('div');
+        //         messageDiv.className = type === 'user' ? 'user-message' : 'chatgpt-message';
+        //         messageDiv.innerHTML = `
+        //     <span style="font-size: 0.8em; color: gray;">[${timestamp}]</span>
+        //     <br>
+        //     ${message.replace(/\n/g, '<br>')}
+        // `;
+        //         chatBox.appendChild(messageDiv);
+        //         chatBox.scrollTop = chatBox.scrollHeight;
+        //         return messageDiv;
+        //     };
+
+        //     sendMessageButton.addEventListener('click', async () => {
+        //         const userMessage = userMessageInput.value.trim();
+
+        //         if (!userMessage) {
+        //             alert("Please type a message!");
+        //             return;
+        //         }
+
+        //         // Append user's message
+        //         appendMessage(userMessage, 'user', getTimestamp());
+        //         sendMessageButton.disabled = true;
+
+        //         try {
+        //             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute(
+        //                 'content');
+        //             const response = await fetch('/api/send-message', {
+        //                 method: 'POST',
+        //                 headers: {
+        //                     'Content-Type': 'application/json',
+        //                     'X-CSRF-TOKEN': csrfToken,
+        //                 },
+        //                 body: JSON.stringify({
+        //                     message: userMessage,
+        //                 }),
+        //             });
+
+        //             if (!response.ok) {
+        //                 console.error('Response error:', response.status, response.statusText);
+        //                 throw new Error('Failed to get a response from the server.');
+        //             }
+
+        //             const reader = response.body.getReader();
+        //             let aiResponse = '';
+        //             const chatGPTMessage = appendMessage('...', 'chatgpt',
+        //         getTimestamp()); // Placeholder
+
+        //             console.log('Start reading stream...');
+        //             while (true) {
+        //                 const {
+        //                     done,
+        //                     value
+        //                 } = await reader.read();
+        //                 if (done) {
+        //                     console.log("Stream ended.");
+        //                     break;
+        //                 }
+
+        //                 const chunk = new TextDecoder().decode(value);
+        //                 console.log("Received chunk:", chunk); // Debugging log for received chunk
+
+        //                 // Process each line in the chunk
+        //                 const lines = chunk.split('\n');
+        //                 lines.forEach((line) => {
+        //                     if (line.startsWith('data:')) {
+        //                         const data = line.replace('data: ', '').trim();
+
+        //                         if (data === '[DONE]') {
+        //                             console.log("Stream received [DONE] signal.");
+        //                             return; // End of stream
+        //                         }
+
+        //                         try {
+        //                             const parsedData = JSON.parse(data);
+        //                             const content = parsedData.choices[0]?.delta?.content || '';
+        //                             console.log("Parsed content:",
+        //                             content); // Debugging log for parsed content
+
+        //                             aiResponse += content;
+        //                             chatGPTMessage.innerHTML = `
+        //                         <span style="font-size: 0.8em; color: gray;">[${getTimestamp()}]</span>
+        //                         <br>
+        //                         ${aiResponse.replace(/\n/g, '<br>')}
+        //                     `;
+        //                         } catch (err) {
+        //                             console.error('Error parsing chunk:', line,
+        //                             err); // Debugging log for parse errors
+        //                         }
+        //                     }
+        //                 });
+        //             }
+        //         } catch (error) {
+        //             console.error('Error occurred:', error); // Debugging log for general errors
+        //             appendMessage('ChatGPT: Failed to communicate with the server.', 'chatgpt',
+        //                 getTimestamp());
+        //         } finally {
+        //             sendMessageButton.disabled = false;
+        //             userMessageInput.value = '';
+        //             console.log('Request completed.'); // Debugging log for completion
+        //         }
+        //     });
+        // });
+		document.addEventListener('DOMContentLoaded', async () => {
+    const chatBox = document.getElementById('chat-box');
+    const sendMessageButton = document.getElementById('send-message');
+    const userMessageInput = document.getElementById('user-message');
+
+    // Helper function to get the current timestamp
+    const getTimestamp = () => {
+        const now = new Date();
+        return now.toLocaleString([], {
+            year: 'numeric',
+            month: 'short',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+        });
+    };
+
+    // Function to append messages to the chatbox
+    const appendMessage = (message, type, timestamp) => {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = type === 'user' ? 'user-message' : 'chatgpt-message';
+        messageDiv.innerHTML = `
+            <span style="font-size: 0.8em; color: gray;">[${timestamp}]</span>
+            <br>
+            ${message.replace(/\n/g, '<br>')}
+        `;
+        chatBox.appendChild(messageDiv);
+        chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to the latest message
+        return messageDiv;
+    };
+
+    // Fetch and display previous conversations
+    const loadConversations = async () => {
+        try {
+            const response = await fetch('/api/get-conversations', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
             });
 
-        });
+            console.log({ response }); // Debugging log for response
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch previous conversations.');
+            }
+
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                const conversations = data.data;
+
+                conversations.forEach((conversation) => {
+                    const timestamp = new Date(conversation.created_at).toLocaleString([], {
+                        year: 'numeric',
+                        month: 'short',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true,
+                    });
+                    appendMessage(conversation.user_message, 'user', timestamp);
+                    appendMessage(conversation.chatgpt_response, 'chatgpt', timestamp);
+                });
+            } else {
+                console.error('Error fetching conversations:', data.message);
+            }
+        } catch (error) {
+            console.error('Error fetching conversations:', error.message);
+            appendMessage('Error: Could not load previous conversations.', 'chatgpt', getTimestamp());
+        }
+    };
+
+    // Load conversations on page load
+    await loadConversations();
+
+    // Handle sending a new message
+    sendMessageButton.addEventListener('click', async () => {
+        const userMessage = userMessageInput.value.trim();
+
+        if (!userMessage) {
+            alert("Please type a message!");
+            return;
+        }
+
+        // Append user's message to the chatbox
+        appendMessage(userMessage, 'user', getTimestamp());
+        sendMessageButton.disabled = true;
+
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const response = await fetch('/api/send-message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+                body: JSON.stringify({
+                    message: userMessage,
+                }),
+            });
+
+            if (!response.ok) {
+                console.error('Response error:', response.status, response.statusText);
+                throw new Error('Failed to get a response from the server.');
+            }
+
+            const reader = response.body.getReader();
+            let aiResponse = '';
+            const chatGPTMessage = appendMessage('...', 'chatgpt', getTimestamp()); // Placeholder
+
+            console.log('Start reading stream...');
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                    console.log("Stream ended.");
+                    break;
+                }
+
+                const chunk = new TextDecoder().decode(value);
+                console.log("Received chunk:", chunk); // Debugging log for received chunk
+
+                // Process each line in the chunk
+                const lines = chunk.split('\n');
+                lines.forEach((line) => {
+                    if (line.startsWith('data:')) {
+                        const data = line.replace('data: ', '').trim();
+
+                        if (data === '[DONE]') {
+                            console.log("Stream received [DONE] signal.");
+                            return; // End of stream
+                        }
+
+                        try {
+                            const parsedData = JSON.parse(data);
+                            const content = parsedData.choices[0]?.delta?.content || '';
+                            console.log("Parsed content:", content); // Debugging log for parsed content
+
+                            aiResponse += content;
+                            chatGPTMessage.innerHTML = `
+                                <span style="font-size: 0.8em; color: gray;">[${getTimestamp()}]</span>
+                                <br>
+                                ${aiResponse.replace(/\n/g, '<br>')}
+                            `;
+                        } catch (err) {
+                            console.error('Error parsing chunk:', line, err); // Debugging log for parse errors
+                        }
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Error occurred:', error); // Debugging log for general errors
+            appendMessage('ChatGPT: Failed to communicate with the server.', 'chatgpt', getTimestamp());
+        } finally {
+            sendMessageButton.disabled = false;
+            userMessageInput.value = '';
+            console.log('Request completed.'); // Debugging log for completion
+        }
+    });
+});
+
     </script>
 </body>
 
